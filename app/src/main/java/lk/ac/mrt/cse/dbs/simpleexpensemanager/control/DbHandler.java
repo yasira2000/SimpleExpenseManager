@@ -89,7 +89,7 @@ public class DbHandler extends SQLiteOpenHelper {
 
         //save to table
         sqLiteDatabase.insert(TABLE1, null, contentValues);
-        //sqLiteDatabase.close();
+        sqLiteDatabase.close();
 
     }
 
@@ -114,8 +114,7 @@ public class DbHandler extends SQLiteOpenHelper {
                 }
                 while (cursor.moveToNext());
         }
-        //cursor.close();
-        //db.close();
+
         return accountList;
     }
 
@@ -133,8 +132,6 @@ public class DbHandler extends SQLiteOpenHelper {
                 while (cursor.moveToNext());
         }
 
-        //cursor.close();
-        //db.close();
         return accountNumbersList;
     }
 
@@ -155,13 +152,10 @@ public class DbHandler extends SQLiteOpenHelper {
                     cursor.getDouble(3)
             );
 
-            //cursor.close();
-            //db.close();
-
             return account;
         }
-        //cursor.close();
-        //db.close();
+        cursor.close();
+        db.close();
 
         String msg = "Account " + accountNo + " is invalid.";
         throw new InvalidAccountException(msg);
@@ -171,7 +165,6 @@ public class DbHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
 
         db.delete(TABLE1, ACCOUNT_NUMBER+"=?", new String[]{accountNo});
-        //db.close();
     }
 
     public void updateBalance(String accountNo, ExpenseType expenseType, double amount) throws InvalidAccountException {
@@ -197,24 +190,21 @@ public class DbHandler extends SQLiteOpenHelper {
         String[] stringArgs = {accountNo};
         db.update(TABLE1, contentValues, ACCOUNT_NUMBER + "=?", stringArgs);
 
-        //db.close();
     }
 
     public void logTransaction(Date date, String accountNo, ExpenseType expenseType, double amount)  {
         SQLiteDatabase db = getWritableDatabase();
         Transaction transaction = new Transaction(date, accountNo, expenseType, amount);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         ContentValues contentValues = new ContentValues();
 
         contentValues.put(ACCOUNT_NUMBER, accountNo);
         contentValues.put(DATE, sdf.format(date));
         contentValues.put(TYPE, expenseType.name());
-        //contentValues.put(ACCOUNT_HOLDER, account.getAccountHolderName());
         contentValues.put(AMOUNT, amount);
 
         db.insert(TABLE2, null, contentValues);
-        //db.close();
     }
 
     public List<Transaction> getAllTransactionLogs() throws ParseException {
@@ -222,7 +212,7 @@ public class DbHandler extends SQLiteOpenHelper {
         List<Transaction> transactionList = new ArrayList<>();
         ExpenseType expenseType;
         Date date;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         String query = "SELECT * FROM " + TABLE2;
 
@@ -248,7 +238,6 @@ public class DbHandler extends SQLiteOpenHelper {
                 transactionList.add(transaction);
             }while(cursor.moveToNext());
         }
-        System.out.println("get all transaction");
         return transactionList;
     }
 }
